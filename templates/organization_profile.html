@@ -6,7 +6,9 @@
 <div class="organization-profile-container">
     <div class="organization-profile-header">
         <div class="organization-profile-image">
-            <img src="{{ url_for('static', filename='images/default-profile.png') }}" alt="Organization Logo" id="organizationLogo">
+            <div class="profile-placeholder" id="organizationLogo">
+                <ion-icon name="person-circle" style="font-size: 120px; color: #e0e0e0;"></ion-icon>
+            </div>
         </div>
         <div class="organization-profile-info">
             <h1>{{ profile.username }}</h1>
@@ -130,8 +132,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <script src="{{ url_for('static', filename='js/organization-profile.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

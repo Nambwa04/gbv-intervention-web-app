@@ -118,10 +118,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateProfilePicture(filename) {
+        // Image display removed per styling requirements
+        /*
         const profilePic = document.querySelector('.profile-pic');
         if (profilePic) {
             profilePic.src = `/static/uploads/${filename}`;
         }
+        */
     }
 
     function updateStatusIndicator(status) {

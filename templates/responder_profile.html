@@ -6,7 +6,9 @@
 <div class="responder-profile-container">
     <div class="responder-profile-header">
         <div class="responder-profile-image">
-            <img src="{{ url_for('static', filename='images/default-profile.png') }}" alt="Profile Picture" id="profilePic">
+            <div class="profile-placeholder" id="profilePic">
+                <ion-icon name="person-circle" style="font-size: 120px; color: #e0e0e0;"></ion-icon>
+            </div>
         </div>
         <div class="responder-profile-info">
             <h1>{{ profile.name or user.username }}</h1>
@@ -250,9 +252,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <script src="{{ url_for('static', filename='js/responder-profile.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {

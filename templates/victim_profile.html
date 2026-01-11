@@ -7,7 +7,9 @@
     <!-- Header Section -->
     <div class="victim-profile-header">
         <div class="victim-profile-image">
-            <img src="{{ url_for('static', filename='images/default-profile.png') }}" alt="Profile Picture" id="profilePic">
+            <div class="profile-placeholder" id="profilePic">
+                <ion-icon name="person-circle" style="font-size: 120px; color: #e0e0e0;"></ion-icon>
+            </div>
         </div>
         <div class="victim-profile-info">
             <h1>{{ profile.username or user.username }}</h1>
@@ -188,6 +190,9 @@
             </div>
             <form action="{{ url_for('victimProfile.update_location') }}" method="POST" class="victim-location-form">
                 <div class="form-group">
+                    <button type="button" class="btn btn-secondary" id="detectLocationBtn" style="width: 100%; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                        <ion-icon name="location"></ion-icon> Use Current Location
+                    </button>
                     <label for="address">Current Address:</label>
                     <input type="text" id="address" name="address" value="{{ profile.address }}">
                 </div>
@@ -204,9 +209,6 @@
 </div>
 
 {% block scripts %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-<script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <script src="{{ url_for('static', filename='js/sos.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -297,8 +299,93 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    fetchMessages(); // Initial fetch
+    // Auto-detect Location Logic (Moved up to ensure execution)
+    const detectLocationBtn = document.getElementById('detectLocationBtn');
+    const addressInput = document.getElementById('address');
+    const cityInput = document.getElementById('city');
+
+    if (detectLocationBtn) {
+        console.log("Location button found and listener attached");
+        detectLocationBtn.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                const originalText = detectLocationBtn.innerHTML;
+                detectLocationBtn.innerHTML = '<ion-icon name="sync-outline" class="spin"></ion-icon> Detecting...';
+                detectLocationBtn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const long = position.coords.longitude;
+                    console.log("Location retrieved:", lat, long);
+                    
+                    // Fetch address from OpenStreetMap Nominatim
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}`, {
+                        headers: {
+                            'User-Agent': 'GBV-Intervention-App/1.0'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (addressInput) {
+                                // Try to construct a cleaner address line
+                                let addrStr = data.display_name;
+                                if (data.address) {
+                                    const parts = [];
+                                    if (data.address.house_number) parts.push(data.address.house_number);
+                                    if (data.address.road) parts.push(data.address.road);
+                                    if (parts.length > 0) addrStr = parts.join(' ');
+                                    else if (data.address.suburb) addrStr = data.address.suburb;
+                                }
+                                addressInput.value = data.display_name; // Fallback to full display name for now as it's most accurate
+                            }
+                            if (cityInput) {
+                                cityInput.value = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching address:', error);
+                            alert('Could not fetch address details.');
+                        })
+                        .finally(() => {
+                            detectLocationBtn.innerHTML = originalText;
+                            detectLocationBtn.disabled = false;
+                        });
+
+                }, function(error) {
+                    console.error('Error getting location:', error);
+                    let errorMsg = 'Error getting location.';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = "The request to get user location timed out.";
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            errorMsg = "An unknown error occurred.";
+                            break;
+                    }
+                    alert(errorMsg);
+                    detectLocationBtn.innerHTML = originalText;
+                    detectLocationBtn.disabled = false;
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        });
+    } else {
+        console.error("Location button not found!");
+    }
+
+    try {
+        fetchMessages(); // Initial fetch
+    } catch (e) {
+        console.error("Error fetching messages:", e);
+    }
+
+    // Auto-detect Location removed from here (duplicates)
 });
 </script>
-{% endblock %}
 {% endblock %}

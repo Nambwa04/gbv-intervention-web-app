@@ -16,6 +16,7 @@ def create_app():
     # Initialize extensions
     mongo.init_app(app)
     mail.init_app(app)
+    realtime_service.init_app(app)
 
     # Initialize User collection
     with app.app_context():

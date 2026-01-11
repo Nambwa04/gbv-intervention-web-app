@@ -96,10 +96,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateLogo(filename) {
+        // Image display removed per styling requirements
+        /*
         const logoImg = document.querySelector('.org-logo');
         if (logoImg) {
             logoImg.src = `/static/uploads/${filename}`;
         }
+        */
     }
 
     function showAddResponderModal() {

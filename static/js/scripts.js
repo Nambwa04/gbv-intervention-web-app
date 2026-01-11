@@ -137,24 +137,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const confirmPassword = document.getElementById('confirmPassword');
 
     // Add a click event listener to the "Show/Hide" button for the password field
-    togglePassword.addEventListener('click', function() {
-        // Check the current type of the password field (either "password" or "text")
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        // Toggle the type attribute of the password field
-        password.setAttribute('type', type);
-        // Update the button text to "Show" or "Hide" based on the current state
-        this.textContent = type === 'password' ? 'Show' : 'Hide';
-    });
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function() {
+            // Check the current type of the password field (either "password" or "text")
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            // Toggle the type attribute of the password field
+            password.setAttribute('type', type);
+            // Toggle icon
+            this.setAttribute('name', type === 'password' ? 'eye-outline' : 'eye-off-outline');
+        });
+    }
 
     // Add a click event listener to the "Show/Hide" button for the confirm password field
-    toggleConfirmPassword.addEventListener('click', function() {
-        // Check the current type of the confirm password field (either "password" or "text")
-        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-        // Toggle the type attribute of the confirm password field
-        confirmPassword.setAttribute('type', type);
-        // Update the button text to "Show" or "Hide" based on the current state
-        this.textContent = type === 'password' ? 'Show' : 'Hide';
-    });
+    if (toggleConfirmPassword) {
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            // Toggle icon
+            this.setAttribute('name', type === 'password' ? 'eye-outline' : 'eye-off-outline');
+        });
+    }
 });
 
 // START OF forgotpassword.html

@@ -1,5 +1,6 @@
 from flask_socketio import SocketIO
 from models.user import User
+from models import mongo
 import threading
 import time
 
