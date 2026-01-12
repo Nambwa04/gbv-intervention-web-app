@@ -764,11 +764,58 @@ text-decoration: underline;
     gap: 0.25rem;
     position: relative; /* For icon positioning */
 }
-.form-control ion-icon{
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex; /* alignment fix */
+    align-items: center; /* This might help if we were doing flex layout, but for absolute it doesn't hurt */
+}
+
+/* Floating Label Styles */
+.input-wrapper.floating-label label {
     position: absolute;
-    left: 10px;
+    left: 2.5rem;
     top: 50%;
     transform: translateY(-50%);
+    color: #999;
+    font-size: 1rem;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    padding: 0 4px;
+}
+
+.input-wrapper.floating-label input:focus + label,
+.input-wrapper.floating-label input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 0.75rem;
+    color: #d32f2f;
+}
+
+/* Floating label for select elements */
+.input-wrapper.floating-label select:focus + label,
+.input-wrapper.floating-label select:valid + label {
+    top: 0;
+    font-size: 0.75rem;
+    color: #d32f2f;
+}
+
+.input-wrapper.floating-label select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    display: block;
+}
+.form-control ion-icon,
+.input-wrapper ion-icon {
+    position: absolute;
+    left: 10px;
+    top: 14px;
     color: #d32f2f;
     font-size: 1.2rem;
     z-index: 10;
@@ -888,9 +935,10 @@ button:hover {
     text-align: center;
 }
 /*scrollbar styles*/
-/*.register-container::-webkit-scrollbar {
-    width: 8px; /* Sets width of scrollbar 
-}*/
+.register-container::-webkit-scrollbar {
+    width: 8px; /* Sets width of scrollbar */
+    background: transparent; /*scrollbar track transparent */
+}
 .register-container::-webkit-scrollbar-thumb {
     width: 8px; /* Sets width of scrollbar */
     background: #ccc; /*scrollbar thumb transparent */
@@ -1369,19 +1417,6 @@ button:hover {
 .form-group input:focus, .datafield input:focus {
     outline: none;
     border-color: #d32f2f;
-}
-
-.datafield ion-icon {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    font-size: 1.2rem;
-    color: #6c757d;
-}
-
-.datafield input {
-    padding-left: 2.5rem;
 }
 
 .btn, .reset-password-btn {

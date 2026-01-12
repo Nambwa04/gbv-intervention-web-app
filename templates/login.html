@@ -22,15 +22,21 @@
             <h2>Login</h2>
 
             <div class="form-control">
-                <ion-icon name="mail-outline"></ion-icon>
-                <input type="email" id="email" name="email" placeholder="Email" required>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="mail-outline"></ion-icon>
+                    <input type="email" id="email" name="email" placeholder=" " required>
+                    <label for="email">Email</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <ion-icon name="eye-outline" id="togglePassword" class="password-toggle"></ion-icon>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <input type="password" id="password" name="password" placeholder=" " required>
+                    <label for="password">Password</label>
+                    <ion-icon name="eye-outline" id="togglePassword" class="password-toggle"></ion-icon>
+                </div>
                 <small>Error message</small>
             </div>
             

@@ -21,50 +21,71 @@
         <form action="{{ url_for('auth.register') }}" id="registerForm" class="form" method="POST">
             
             <div class="form-control">
-                <ion-icon name="person-outline"></ion-icon>
-                <input type="text" id="username" name="username" placeholder="Username" required>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="person-outline"></ion-icon>
+                    <input type="text" id="username" name="username" placeholder=" " required>
+                    <label for="username">Username</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="mail-outline"></ion-icon>
-                <input type="email" id="email" name="email" placeholder="Email" required>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="mail-outline"></ion-icon>
+                    <input type="email" id="email" name="email" placeholder=" " required>
+                    <label for="email">Email</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="phone-portrait-outline"></ion-icon>
-                <input type="tel" id="phone" name="phone" placeholder="Phone number" required>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="phone-portrait-outline"></ion-icon>
+                    <input type="tel" id="phone" name="phone" placeholder=" " required>
+                    <label for="phone">Phone number</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="location"></ion-icon>
-                <input type="text" id="location" name="location" placeholder="Location" required>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="location"></ion-icon>
+                    <input type="text" id="location" name="location" placeholder=" " required>
+                    <label for="location">Location</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="male-female-outline"></ion-icon>
-                <select id="gender" name="gender" required>
-                    <option value="" disabled selected>Select your gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="male-female-outline"></ion-icon>
+                    <select id="gender" name="gender" required>
+                        <option value="" disabled selected></option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <label for="gender">Select your gender</label>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-                <input type="password" id="password" name="password" placeholder="Password" required>
-                <ion-icon name="eye-outline" id="togglePassword" class="password-toggle"></ion-icon>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <input type="password" id="password" name="password" placeholder=" " required>
+                    <label for="password">Password</label>
+                    <ion-icon name="eye-outline" id="togglePassword" class="password-toggle"></ion-icon>
+                </div>
                 <small>Error message</small>
             </div>
 
             <div class="form-control">
-                <ion-icon name="lock-closed-outline"></ion-icon>
-                <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
-                <ion-icon name="eye-outline" id="toggleConfirmPassword" class="password-toggle"></ion-icon>
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <input type="password" id="confirmPassword" name="confirm_password" placeholder=" " required>
+                    <label for="confirmPassword">Confirm Password</label>
+                    <ion-icon name="eye-outline" id="toggleConfirmPassword" class="password-toggle"></ion-icon>
+                </div>
                 <small>Error message</small>
             </div>
 
