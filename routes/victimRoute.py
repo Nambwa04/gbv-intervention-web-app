@@ -54,7 +54,8 @@ def manage_victims():
 def add_victim():
     try:
         # Extract form data
-        username = request.form.get('username')
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
         email = request.form.get('email')
         phone = request.form.get('phone')
         gender = request.form.get('gender')
@@ -63,7 +64,8 @@ def add_victim():
         password = request.form.get('password', 'defaultPassword123')  # Add default password
         role = 'victim'
 
-        # Create user account first
+        # Create user account first (using full name for username)
+        username = f"{first_name} {last_name}"
         user_result = User.register_user(username, email, password, role)
         
         if not user_result:
@@ -76,7 +78,8 @@ def add_victim():
         # Create victim profile
         victim_data = {
             "user_id": user_id,
-            "username": username,
+            "first_name": first_name,
+            "last_name": last_name,
             "email": email,
             "phone": phone,
             "gender": gender,
@@ -102,7 +105,8 @@ def edit_victim(victim_id):
     try:
         # Collect all form data into a dictionary
         updated_data = {
-            'username': request.form.get('username'),
+            'first_name': request.form.get('first_name'),
+            'last_name': request.form.get('last_name'),
             'email': request.form.get('email'),
             'phone': request.form.get('phone'),
             'gender': request.form.get('gender'),
@@ -111,8 +115,8 @@ def edit_victim(victim_id):
         }
         
         # Validate that all required fields are provided
-        if not all([updated_data['username'], updated_data['email'], updated_data['phone'], 
-                   updated_data['gender'], updated_data['location']]):
+        if not all([updated_data['first_name'], updated_data['last_name'], updated_data['email'], 
+                   updated_data['phone'], updated_data['gender'], updated_data['location']]):
             flash('All fields are required!', 'error')
             return redirect(url_for('victim.manage_victims'))
         

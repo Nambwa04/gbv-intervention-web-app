@@ -53,11 +53,12 @@ class VictimService:
             if user:
                 profile = {
                     "user_id": ObjectId(user_id),
-                    "username": user.get("username", ""),
+                    "first_name": user.get("first_name", ""),
+                    "last_name": user.get("last_name", ""),
                     "email": user.get("email", ""),
-                    "phone": "",
+                    "phone": user.get("phone", ""),
+                    "gender": user.get("gender", ""),
                     "location": "",
-                    "gender": "",
                     "case_description": "",
                     "location_sharing": False,
                     "created_at": datetime.now()

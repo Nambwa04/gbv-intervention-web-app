@@ -23,8 +23,17 @@
             <div class="form-control">
                 <div class="input-wrapper floating-label">
                     <ion-icon name="person-outline"></ion-icon>
-                    <input type="text" id="username" name="username" placeholder=" " required>
-                    <label for="username">Username</label>
+                    <input type="text" id="first_name" name="first_name" placeholder=" " required>
+                    <label for="first_name">First Name</label>
+                </div>
+                <small>Error message</small>
+            </div>
+
+            <div class="form-control">
+                <div class="input-wrapper floating-label">
+                    <ion-icon name="person-outline"></ion-icon>
+                    <input type="text" id="last_name" name="last_name" placeholder=" " required>
+                    <label for="last_name">Last Name</label>
                 </div>
                 <small>Error message</small>
             </div>
@@ -39,19 +48,9 @@
             </div>
 
             <div class="form-control">
-                <div class="input-wrapper floating-label">
-                    <ion-icon name="phone-portrait-outline"></ion-icon>
-                    <input type="tel" id="phone" name="phone" placeholder=" " required>
-                    <label for="phone">Phone number</label>
-                </div>
-                <small>Error message</small>
-            </div>
-
-            <div class="form-control">
-                <div class="input-wrapper floating-label">
-                    <ion-icon name="location"></ion-icon>
-                    <input type="text" id="location" name="location" placeholder=" " required>
-                    <label for="location">Location</label>
+                <div class="phone-input-wrapper">
+                    <input type="tel" id="phone" name="phone" placeholder="Phone number" required>
+                    <input type="hidden" id="full_phone" name="full_phone">
                 </div>
                 <small>Error message</small>
             </div>
@@ -110,4 +109,37 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/utils.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.querySelector('#phone');
+    const fullPhoneInput = document.querySelector('#full_phone');
+    
+    const iti = window.intlTelInput(phoneInput, {
+        initialCountry: 'ke',
+        preferredCountries: ['ke', 'ug', 'tz', 'rw', 'et', 'za', 'ng', 'gh', 'us', 'gb'],
+        separateDialCode: true,
+        utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/utils.js'
+    });
+    
+    // On form submit, set the full phone number with country code
+    document.querySelector('#registerForm').addEventListener('submit', function(e) {
+        fullPhoneInput.value = iti.getNumber();
+    });
+    
+    // Validate phone number on blur
+    phoneInput.addEventListener('blur', function() {
+        if (phoneInput.value.trim()) {
+            if (iti.isValidNumber()) {
+                phoneInput.classList.remove('error');
+                phoneInput.classList.add('valid');
+            } else {
+                phoneInput.classList.add('error');
+                phoneInput.classList.remove('valid');
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

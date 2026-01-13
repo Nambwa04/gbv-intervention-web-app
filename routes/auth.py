@@ -10,35 +10,41 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form["username"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        location = request.form["location"]
-        gender = request.form["gender"]
-        password = request.form["password"]
-        confirm_password = request.form["confirm_password"]
+        first_name = request.form.get("first_name", "")
+        last_name = request.form.get("last_name", "")
+        email = request.form.get("email", "")
+        phone = request.form.get("full_phone") or request.form.get("phone", "")
+        gender = request.form.get("gender", "")
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
 
         # Checking if user exists
         if User.find_by_email(email):
             flash("Email already exists", "danger")
             return redirect(url_for("auth.register"))
 
+        # Check if passwords match
+        if password != confirm_password:
+            flash("Passwords do not match", "danger")
+            return redirect(url_for("auth.register"))
+
         try:
-            # Create new user
-            user = User.register_user(username, email, password, role="victim")
+            # Create new user with first_name and last_name
+            user = User.register_user(f"{first_name} {last_name}", email, password, role="victim")
             user_id = user.inserted_id  # Ensure correct user_id retrieval
             
             print("Newly Registered User ID:", user_id)  # Debugging line
 
-            # Create victim profile
+            # Create victim profile with new fields
             victimService.victims.insert_one({
                 "user_id": user_id,
-                "username": username,
+                "first_name": first_name,
+                "last_name": last_name,
                 "email": email,
                 "phone": phone,
-                "location": location,
                 "gender": gender,
-                "case_description": "Unknown"
+                "location": "",
+                "case_description": ""
             })
 
             print(request.form)  # Debugging line
@@ -106,17 +112,28 @@ def logout():
 @auth_bp.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form.get('email')
+        email = request.form.get('email', '').strip().lower()
+        
+        if not email:
+            flash("Please enter your email address.", "error")
+            return render_template('forgot_password.html')
+        
         user = User.find_by_email(email)
         if user:
-            # Generate a password reset token
-            reset_token = generate_reset_token(user['email'])
-            # Send the reset email
-            send_reset_email(user['email'], reset_token)
-            flash("Password reset link sent to your email.", "success")
-            return redirect(url_for('auth.login'))
+            try:
+                # Generate a password reset token
+                reset_token = generate_reset_token(user['email'])
+                # Send the reset email
+                send_reset_email(user['email'], reset_token)
+                flash("Password reset link sent to your email. Please check your inbox.", "success")
+            except Exception as e:
+                print(f"Error sending reset email: {str(e)}")
+                flash("An error occurred while sending the reset email. Please try again later.", "error")
+                return render_template('forgot_password.html')
         else:
-            flash("Email not found", "error")
+            # For security, don't reveal whether the email exists
+            flash("If an account with that email exists, a password reset link has been sent.", "success")
+        return redirect(url_for('auth.login'))
     return render_template('forgot_password.html')
 
 @auth_bp.route('/reset_password', methods=['GET', 'POST'])
@@ -128,12 +145,17 @@ def reset_password():
 
     email = verify_reset_token(token)
     if not email:
-        flash("Invalid or expired token.", "error")
+        flash("Invalid or expired token. Please request a new password reset link.", "error")
         return redirect(url_for('auth.forgot_password'))
 
     if request.method == 'POST':
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+
+        # Validate password length
+        if len(new_password) < 8:
+            flash("Password must be at least 8 characters long.", "error")
+            return render_template('reset_password.html', token=token)
 
         if new_password != confirm_password:
             flash("Passwords do not match.", "error")
@@ -142,9 +164,14 @@ def reset_password():
         # Update the user's password
         user = User.find_by_email(email)
         if user:
-            # Pass the plain password to update_password
-            User.update_password(user['_id'], new_password)
-            flash("Your password has been reset successfully.", "success")
-            return redirect(url_for('auth.login'))
+            try:
+                # Pass the plain password to update_password
+                User.update_password(user['_id'], new_password)
+                flash("Your password has been reset successfully. You can now log in with your new password.", "success")
+                return redirect(url_for('auth.login'))
+            except Exception as e:
+                print(f"Error updating password: {str(e)}")
+                flash("An error occurred while resetting your password. Please try again.", "error")
+                return render_template('reset_password.html', token=token)
         flash("User not found.", "error")
     return render_template('reset_password.html', token=token)

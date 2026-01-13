@@ -14,10 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Register Form Validation
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('registerForm');
-    const username = document.getElementById('username');
+    const firstName = document.getElementById('first_name');
+    const lastName = document.getElementById('last_name');
     const email = document.getElementById('email');
     const phone = document.getElementById('phone');
-    const location = document.getElementById('location');
     const gender = document.getElementById('gender');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
@@ -31,75 +31,92 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function checkInputs() {
         // trim to remove the whitespaces
-        const usernameValue = username.value.trim();
-        const emailValue = email.value.trim();
-        const phoneValue = phone.value.trim();
-        const locationValue = location.value.trim();
-        const genderValue = gender.value.trim();
-        const passwordValue = password.value.trim();
-        const confirmPasswordValue = confirmPassword.value.trim();
+        const firstNameValue = firstName ? firstName.value.trim() : '';
+        const lastNameValue = lastName ? lastName.value.trim() : '';
+        const emailValue = email ? email.value.trim() : '';
+        const phoneValue = phone ? phone.value.trim() : '';
+        const genderValue = gender ? gender.value.trim() : '';
+        const passwordValue = password ? password.value.trim() : '';
+        const confirmPasswordValue = confirmPassword ? confirmPassword.value.trim() : '';
         
         let isValid = true;
 
-        if(usernameValue === '') {
-            setErrorFor(username, 'Username cannot be blank');
-            isValid = false;
-        } else if(usernameValue.length < 5) {
-            setErrorFor(username, 'Username must be at least 5 characters');
-            isValid = false;
-        } else {
-            setSuccessFor(username);
-        }
-        
-        if(emailValue === '') {
-            setErrorFor(email, 'Email cannot be blank');
-            isValid = false;
-        } else if (!isEmail(emailValue)) {
-            setErrorFor(email, 'Not a valid email');
-            isValid = false;
-        } else {
-            setSuccessFor(email);
+        if(firstName) {
+            if(firstNameValue === '') {
+                setErrorFor(firstName, 'First name cannot be blank');
+                isValid = false;
+            } else if(firstNameValue.length < 2) {
+                setErrorFor(firstName, 'First name must be at least 2 characters');
+                isValid = false;
+            } else {
+                setSuccessFor(firstName);
+            }
         }
 
-        if(phoneValue === '') {
-            setErrorFor(phone, 'Phone number cannot be blank');
-            isValid = false;
-        } else {
-            setSuccessFor(phone);
-        }
-
-        if(locationValue === '') {
-            setErrorFor(location, 'Location cannot be blank');
-            isValid = false;
-        } else {
-            setSuccessFor(location);
-        }
-
-        if(genderValue === '') {
-            setErrorFor(gender, 'Gender cannot be blank');
-            isValid = false;
-        } else {
-            setSuccessFor(gender);
+        if(lastName) {
+            if(lastNameValue === '') {
+                setErrorFor(lastName, 'Last name cannot be blank');
+                isValid = false;
+            } else if(lastNameValue.length < 2) {
+                setErrorFor(lastName, 'Last name must be at least 2 characters');
+                isValid = false;
+            } else {
+                setSuccessFor(lastName);
+            }
         }
         
-        if(passwordValue === '') {
-            setErrorFor(password, 'Password cannot be blank');
-            isValid = false;
-        } else if(passwordValue.length < 6) {
-            setErrorFor(password, 'Password must be at least 6 characters');
-            isValid = false;
-        } else {
-            setSuccessFor(password);
+        if(email) {
+            if(emailValue === '') {
+                setErrorFor(email, 'Email cannot be blank');
+                isValid = false;
+            } else if (!isEmail(emailValue)) {
+                setErrorFor(email, 'Not a valid email');
+                isValid = false;
+            } else {
+                setSuccessFor(email);
+            }
+        }
+
+        if(phone) {
+            if(phoneValue === '') {
+                setErrorFor(phone, 'Phone number cannot be blank');
+                isValid = false;
+            } else {
+                setSuccessFor(phone);
+            }
+        }
+
+        if(gender) {
+            if(genderValue === '') {
+                setErrorFor(gender, 'Gender cannot be blank');
+                isValid = false;
+            } else {
+                setSuccessFor(gender);
+            }
         }
         
-        if(confirmPasswordValue === '') {
-            setErrorFor(confirmPassword, 'Confirm Password cannot be blank');
-            isValid = false;
-        } else if(passwordValue !== confirmPasswordValue) {
-            setErrorFor(confirmPassword, 'Passwords do not match');
-            isValid = false;
-        } else {
-            setSuccessFor(confirmPassword);
+        if(password) {
+            if(passwordValue === '') {
+                setErrorFor(password, 'Password cannot be blank');
+                isValid = false;
+            } else if(passwordValue.length < 6) {
+                setErrorFor(password, 'Password must be at least 6 characters');
+                isValid = false;
+            } else {
+                setSuccessFor(password);
+            }
+        }
+        
+        if(confirmPassword) {
+            if(confirmPasswordValue === '') {
+                setErrorFor(confirmPassword, 'Confirm Password cannot be blank');
+                isValid = false;
+            } else if(passwordValue !== confirmPasswordValue) {
+                setErrorFor(confirmPassword, 'Passwords do not match');
+                isValid = false;
+            } else {
+                setSuccessFor(confirmPassword);
+            }
         }
 
         if (isValid){
@@ -108,15 +125,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function setErrorFor(input, message) {
-        const formControl = input.parentElement;
+        const formControl = input.parentElement.parentElement;
         const small = formControl.querySelector('small');
-        formControl.className = 'register-form-control error';
-        small.innerText = message;
+        formControl.className = 'form-control error';
+        if (small) small.innerText = message;
     }
 
     function setSuccessFor(input) {
-        const formControl = input.parentElement;
-        formControl.className = 'register-form-control success';
+        const formControl = input.parentElement.parentElement;
+        formControl.className = 'form-control success';
     }
 
     function isEmail(email) {

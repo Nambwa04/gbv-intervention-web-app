@@ -60,11 +60,20 @@ def profile():
 def update_profile():
     try:
         user_id = session.get("user_id")
+        
+        # Get phone - prefer full_phone if available, otherwise use phone
+        phone = request.form.get('full_phone') or request.form.get('phone')
+        
         update_data = {
-            'username': request.form.get('name'),
+            'first_name': request.form.get('first_name'),
+            'last_name': request.form.get('last_name'),
             'email': request.form.get('email'),
-            'phone': request.form.get('phone')
+            'phone': phone,
+            'gender': request.form.get('gender')
         }
+        
+        # Remove None values
+        update_data = {k: v for k, v in update_data.items() if v is not None}
         
         if victimService.update_victim_profile(user_id, update_data):
             flash("Profile updated successfully", "success")

@@ -4,13 +4,10 @@ from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from flask_mail import Message
 from config import Config
 from flask import current_app, url_for
-from flask_mail import Mail, Message
 from bson import ObjectId
 from datetime import datetime
-from models import mongo
+from models import mongo, mail
 from models.user import User
-
-mail = Mail()
 
 def generate_default_password(length=12):
     characters = string.ascii_letters + string.digits + string.punctuation
@@ -35,7 +32,22 @@ def send_reset_email(to_email, token):
                   sender=current_app.config['MAIL_DEFAULT_SENDER'],
                   recipients=[to_email])
     msg.body = f"To reset your password, click the following link: {reset_url}\n\nIf you did not request a password reset, please ignore this email."
-    mail.send(msg)
+    
+    try:
+        mail.send(msg)
+        print(f"Password reset email sent to {to_email}")
+    except Exception as e:
+        # Log the reset URL for development/testing when email fails
+        print(f"Failed to send email: {str(e)}")
+        print(f"\n{'='*60}")
+        print(f"DEVELOPMENT MODE: Password Reset Link")
+        print(f"{'='*60}")
+        print(f"Email: {to_email}")
+        print(f"Reset URL: {reset_url}")
+        print(f"{'='*60}\n")
+        # Re-raise if not a network error, otherwise allow the flow to continue
+        if "Network is unreachable" not in str(e) and "Connection refused" not in str(e):
+            raise
 
 def ensure_user_profile(user_id, role):
     """Ensure a user has a profile in their role-specific collection"""

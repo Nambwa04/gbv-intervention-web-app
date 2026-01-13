@@ -1,0 +1,72 @@
+<!-- Admin Collapsible Sidebar -->
+<aside class="admin-sidebar" id="adminSidebar">
+    <button class="sidebar-toggle" onclick="toggleAdminSidebar()">
+        <ion-icon name="chevron-back-outline" id="toggleIcon"></ion-icon>
+    </button>
+    
+    <div class="sidebar-header">
+        <div class="sidebar-profile-image">
+            <ion-icon name="shield-checkmark-outline" style="font-size: 50px; color: #d32f2f;"></ion-icon>
+        </div>
+        <div class="sidebar-profile-info">
+            <h3>Admin</h3>
+            <p>Administrator</p>
+        </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-nav-btn {{ 'active' if active_page == 'dashboard' else '' }}">
+            <ion-icon name="home-outline"></ion-icon>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('victim.manage_victims') }}" class="sidebar-nav-btn {{ 'active' if active_page == 'victims' else '' }}">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Victims</span>
+        </a>
+        <a href="{{ url_for('responder.manage_responders') }}" class="sidebar-nav-btn {{ 'active' if active_page == 'responders' else '' }}">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>Responders</span>
+        </a>
+        <a href="{{ url_for('organization.manage_organizations') }}" class="sidebar-nav-btn {{ 'active' if active_page == 'organizations' else '' }}">
+            <ion-icon name="briefcase-outline"></ion-icon>
+            <span>Organizations</span>
+        </a>
+        <a href="{{ url_for('resource.manage_resources') }}" class="sidebar-nav-btn {{ 'active' if active_page == 'resources' else '' }}">
+            <ion-icon name="library-outline"></ion-icon>
+            <span>Resources</span>
+        </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout-btn">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <span>Logout</span>
+        </a>
+    </div>
+</aside>
+
+<script>
+function toggleAdminSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const toggleIcon = document.getElementById('toggleIcon');
+    sidebar.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        toggleIcon.setAttribute('name', 'chevron-forward-outline');
+    } else {
+        toggleIcon.setAttribute('name', 'chevron-back-outline');
+    }
+}
+
+// Date/time display
+function updateDateTime() {
+    const dateTimeEl = document.getElementById('dateTime');
+    if (dateTimeEl) {
+        const now = new Date();
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        dateTimeEl.textContent = now.toLocaleDateString('en-US', options);
+    }
+}
+updateDateTime();
+setInterval(updateDateTime, 60000);
+</script>

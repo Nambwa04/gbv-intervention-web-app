@@ -3,233 +3,445 @@
 {% block title %}Victim Profile{% endblock %}
 
 {% block content %}
-<div class="victim-profile-container">
-    <!-- Header Section -->
-    <div class="victim-profile-header">
-        <div class="victim-profile-image">
-            <div class="profile-placeholder" id="profilePic">
-                <ion-icon name="person-circle" style="font-size: 120px; color: #e0e0e0;"></ion-icon>
+<div class="victim-profile-layout">
+    <!-- Collapsible Sidebar -->
+    <aside class="victim-sidebar" id="victimSidebar">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <ion-icon name="chevron-back-outline" id="toggleIcon"></ion-icon>
+        </button>
+        
+        <div class="sidebar-header">
+            <div class="sidebar-profile-image">
+                <div class="profile-placeholder" id="profilePic">
+                    <ion-icon name="person-circle" style="font-size: 60px; color: #e0e0e0;"></ion-icon>
+                </div>
+            </div>
+            <div class="sidebar-profile-info">
+                <h3>{{ profile.username or user.username }}</h3>
+                <p>{{ profile.email or user.email }}</p>
             </div>
         </div>
-        <div class="victim-profile-info">
-            <h1>{{ profile.username or user.username }}</h1>
-            <p>{{ profile.email or user.email }}</p>
-        </div>
-        <div class="victim-profile-actions">
-            <a href="{{ url_for('auth.logout') }}" class="btn btn-logout">
+
+        <nav class="sidebar-nav">
+            <button class="sidebar-nav-btn active" data-section="personal">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>Personal Info</span>
+            </button>
+            <button class="sidebar-nav-btn" data-section="cases">
+                <ion-icon name="folder-outline"></ion-icon>
+                <span>My Cases</span>
+            </button>
+            <button class="sidebar-nav-btn" data-section="resources">
+                <ion-icon name="library-outline"></ion-icon>
+                <span>Resources</span>
+            </button>
+            <button class="sidebar-nav-btn" data-section="messages">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                <span>Messages</span>
+            </button>
+            <button class="sidebar-nav-btn" data-section="location">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>Location</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-logout-btn">
                 <ion-icon name="log-out-outline"></ion-icon>
-                Logout
+                <span>Logout</span>
             </a>
         </div>
-        <div class="sos-button-container">
-            <button id="sosButton" class="sos-button">SOS EMERGENCY</button>
-            <div class="sos-button-help">Click in case of emergency to alert responders</div>
-        </div>
-        <div class="location-toggle-container">
-            <label class="location-toggle">
-                <input type="checkbox" id="locationToggle">
-                <span class="location-toggle-slider"></span>
-            </label>
-            <div class="location-status-container">
-                <span class="location-status" id="locationStatus">Disabled</span>
-                <span class="last-updated" id="lastUpdatedTime"></span>
-            </div>
-            <div class="location-indicator" id="locationIndicator"></div>
-        </div>
-    </div>
-    
-    <!-- Tab Navigation -->
-    <div class="victim-profile-tabs">
-        <button class="tab-btn active" data-tab="personal">Personal Info</button>
-        <button class="tab-btn" data-tab="cases">My Cases</button>
-        <button class="tab-btn" data-tab="resources">Resources</button>
-        <button class="tab-btn" data-tab="messages">Messages</button>
-        <button class="tab-btn" data-tab="location">Location</button>
-    </div>
+    </aside>
 
-    <!-- Personal Information Tab -->
-    <div class="tab-content active" id="personal">
-        <form action="{{ url_for('victimProfile.update_profile') }}" method="POST">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="{{ profile.username }}" required>
+    <!-- Main Content Area -->
+    <main class="victim-main-content" id="victimMainContent">
+        <!-- Top Bar with SOS and Location Toggle -->
+        <div class="victim-topbar">
+            <div class="sos-button-container">
+                <button id="sosButton" class="sos-button">SOS EMERGENCY</button>
+                <div class="sos-button-help">Click in case of emergency</div>
             </div>
-
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="{{ profile.email }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Phone:</label>
-                <input type="tel" id="phone" name="phone" value="{{ profile.phone }}" required>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Update Profile</button>
-            </div>
-        </form>
-
-        <!-- Password Change Section -->
-        <form action="{{ url_for('victimProfile.change_password') }}" method="POST">
-            <h3 style="margin-top: 1rem;">Change Password</h3>
-            <div class="form-group">
-                <label for="current_password">Current Password:</label>
-                <input type="password" id="current_password" name="current_password" required>
-            </div>
-            <div class="form-group">
-                <label for="new_password">New Password:</label>
-                <input type="password" id="new_password" name="new_password" required>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-secondary">Change Password</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Cases Tab -->
-    <div class="tab-content" id="cases">
-    <div class="victim-cases-list">
-        {% if cases %}
-            {% for case in cases %}
-            <div class="victim-case-card">
-                <div class="victim-case-header">
-                    <h3>Case #{{ case._id }}</h3>
-                    <span class="status-badge {{ case.status.lower() }}">{{ case.status }}</span>
+            <div class="location-toggle-container">
+                <label class="location-toggle">
+                    <input type="checkbox" id="locationToggle">
+                    <span class="location-toggle-slider"></span>
+                </label>
+                <div class="location-status-container">
+                    <span class="location-status" id="locationStatus">Disabled</span>
+                    <span class="last-updated" id="lastUpdatedTime"></span>
                 </div>
-                <div class="victim-case-details">
-                    <p class="victim-case-description">{{ case.description }}</p>
-                    <p><strong>Created:</strong> {{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                    
-                    {% if case.responder_id %}
-                        <p><strong>Assigned To:</strong> {{ case.responder_name or 'A responder' }}</p>
-                    {% else %}
-                        <p><strong>Assigned To:</strong> Pending assignment</p>
-                    {% endif %}
-                    
-                    {% if case.updated_at != case.created_at %}
-                        <p><strong>Last Updated:</strong> {{ case.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
-                    {% endif %}
-                    
-                    {% if case.notes %}
-                        <div class="victim-case-notes">
-                            <p><strong>Notes from responder:</strong></p>
-                            <p>{{ case.notes }}</p>
+                <div class="location-indicator" id="locationIndicator"></div>
+            </div>
+        </div>
+
+        <!-- Personal Information Section -->
+        <section class="content-section active" id="personal">
+            <h2 class="section-title">Personal Information</h2>
+            
+            <!-- Display Profile Info -->
+            <div class="profile-info-display">
+                <div class="info-card">
+                    <div class="info-row">
+                        <span class="info-label">First Name:</span>
+                        <span class="info-value" id="displayFirstName">{{ profile.first_name or 'Not set' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Last Name:</span>
+                        <span class="info-value" id="displayLastName">{{ profile.last_name or 'Not set' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="displayEmail">{{ profile.email or 'Not set' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone:</span>
+                        <span class="info-value" id="displayPhone">{{ profile.phone or 'Not set' }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Gender:</span>
+                        <span class="info-value" id="displayGender">{{ profile.gender or 'Not set' }}</span>
+                    </div>
+                </div>
+                <div class="profile-actions-btns">
+                    <button type="button" class="btn btn-primary" id="editProfileBtn">
+                        <ion-icon name="create-outline"></ion-icon> Edit Profile
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="changePasswordBtn">
+                        <ion-icon name="lock-closed-outline"></ion-icon> Change Password
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Edit Profile Modal -->
+        <div class="modal-overlay" id="editProfileModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>Edit Profile</h3>
+                    <button type="button" class="modal-close" id="closeProfileModal">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
+                </div>
+                <form action="{{ url_for('victimProfile.update_profile') }}" method="POST" id="profileForm" class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name:</label>
+                            <input type="text" id="first_name" name="first_name" value="{{ profile.first_name or '' }}" required>
                         </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>You have no active cases at this time.</p>
-        {% endif %}
-    </div>
-</div>
+                        <div class="form-group">
+                            <label for="last_name">Last Name:</label>
+                            <input type="text" id="last_name" name="last_name" value="{{ profile.last_name or '' }}" required>
+                        </div>
+                    </div>
 
-    <!-- Resources Tab -->
-    <div class="tab-content" id="resources">
-        <div class="victim-resources-filters">
-            <select id="serviceFilter">
-                <option value="">All Services</option>
-                <option value="medical">Medical</option>
-                <option value="legal">Legal</option>
-                <option value="counseling">Counseling</option>
-            </select>
-        </div>
-        <div class="victim-emergency-contacts">
-            <h3>Emergency Contacts</h3>
-            <div class="victim-contact-list">
-                <div class="victim-contact-item">
-                    <strong>Emergency Hotline:</strong> 911
-                </div>
-                <!-- Add more emergency contacts -->
-            </div>
-        </div>
-        <div class="victim-resources-list">
-            {% for resource in resources %}
-            <div class="victim-resource-card" data-type="{{ resource.type }}">
-                <h3>{{ resource.name }}</h3>
-                <p>{{ resource.description }}</p>
-                <div class="victim-resource-contact">
-                    <p><strong>Phone:</strong> {{ resource.phone }}</p>
-                    <p><strong>Address:</strong> {{ resource.address }}</p>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
+                    <div class="form-group">
+                        <label for="modal_email">Email:</label>
+                        <input type="email" id="modal_email" name="email" value="{{ profile.email }}" required>
+                    </div>
 
-    <!-- Messages Tab -->
-    <div class="tab-content" id="messages">
-        <div class="victim-messages-container">
-            <div class="victim-message-history" id="victimMessageHistory">
-                {% for message in messages %}
-                <div class="victim-message {{ 'sent' if message.sender_id == user.id else 'received' }}">
-                    <div class="victim-message-content">{{ message.content }}</div>
-                    <div class="victim-message-time">{{ message.timestamp.strftime('%H:%M') }}</div>
+                    <div class="form-group">
+                        <label for="profile_phone">Phone:</label>
+                        <div class="phone-input-wrapper">
+                            <input type="tel" id="profile_phone" name="phone" value="{{ profile.phone or '' }}" required>
+                            <input type="hidden" id="profile_full_phone" name="full_phone">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">Gender:</label>
+                        <select id="gender" name="gender" required>
+                            <option value="" disabled>Select your gender</option>
+                            <option value="Male" {{ 'selected' if profile.gender == 'Male' else '' }}>Male</option>
+                            <option value="Female" {{ 'selected' if profile.gender == 'Female' else '' }}>Female</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancelProfileEdit">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Change Password Modal -->
+        <div class="modal-overlay" id="changePasswordModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h3>Change Password</h3>
+                    <button type="button" class="modal-close" id="closePasswordModal">
+                        <ion-icon name="close-outline"></ion-icon>
+                    </button>
+                </div>
+                <form action="{{ url_for('victimProfile.change_password') }}" method="POST" class="modal-body">
+                    <div class="form-group">
+                        <label for="current_password">Current Password:</label>
+                        <input type="password" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">New Password:</label>
+                        <input type="password" id="new_password" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_new_password">Confirm New Password:</label>
+                        <input type="password" id="confirm_new_password" name="confirm_new_password" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" id="cancelPasswordChange">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cases Section -->
+        <section class="content-section" id="cases">
+            <h2 class="section-title">My Cases</h2>
+            <div class="victim-cases-list">
+                {% if cases %}
+                    {% for case in cases %}
+                    <div class="victim-case-card">
+                        <div class="victim-case-header">
+                            <h3>Case #{{ case._id }}</h3>
+                            <span class="status-badge {{ case.status.lower() }}">{{ case.status }}</span>
+                        </div>
+                        <div class="victim-case-details">
+                            <p class="victim-case-description">{{ case.description }}</p>
+                            <p><strong>Created:</strong> {{ case.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            
+                            {% if case.responder_id %}
+                                <p><strong>Assigned To:</strong> {{ case.responder_name or 'A responder' }}</p>
+                            {% else %}
+                                <p><strong>Assigned To:</strong> Pending assignment</p>
+                            {% endif %}
+                            
+                            {% if case.updated_at != case.created_at %}
+                                <p><strong>Last Updated:</strong> {{ case.updated_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            {% endif %}
+                            
+                            {% if case.notes %}
+                                <div class="victim-case-notes">
+                                    <p><strong>Notes from responder:</strong></p>
+                                    <p>{{ case.notes }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-data-message">You have no active cases at this time.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Resources Section -->
+        <section class="content-section" id="resources">
+            <h2 class="section-title">Resources</h2>
+            <div class="victim-resources-filters">
+                <select id="serviceFilter">
+                    <option value="">All Services</option>
+                    <option value="medical">Medical</option>
+                    <option value="legal">Legal</option>
+                    <option value="counseling">Counseling</option>
+                </select>
+            </div>
+            <div class="victim-emergency-contacts">
+                <h3>Emergency Contacts</h3>
+                <div class="victim-contact-list">
+                    <div class="victim-contact-item">
+                        <strong>Emergency Hotline:</strong> 911
+                    </div>
+                </div>
+            </div>
+            <div class="victim-resources-list">
+                {% for resource in resources %}
+                <div class="victim-resource-card" data-type="{{ resource.type }}">
+                    <h3>{{ resource.name }}</h3>
+                    <p>{{ resource.description }}</p>
+                    <div class="victim-resource-contact">
+                        <p><strong>Phone:</strong> {{ resource.phone }}</p>
+                        <p><strong>Address:</strong> {{ resource.address }}</p>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
-            <form action="{{ url_for('victimProfile.send_message') }}" method="POST" class="victim-message-form" id="victimMessageForm">
-                <textarea name="message" id="victimMessageInput" placeholder="Type your message..." required></textarea>
-                <button type="submit" class="btn btn-primary">Send</button>
-            </form>
-        </div>
-    </div>
+        </section>
 
-    <!-- Location Tab -->
-    <div class="tab-content" id="location">
-        <div class="victim-location-settings">
-            <div class="victim-location-sharing">
-                <h3>Location Sharing</h3>
-                <label class="switch">
-                    <input type="checkbox" id="locationToggle" {{ 'checked' if profile.location_sharing }}>
-                    <span class="slider round"></span>
-                </label>
-                <p>Allow responders to see your location</p>
+        <!-- Messages Section -->
+        <section class="content-section" id="messages">
+            <h2 class="section-title">Messages</h2>
+            <div class="victim-messages-container">
+                <div class="victim-message-history" id="victimMessageHistory">
+                    {% for message in messages %}
+                    <div class="victim-message {{ 'sent' if message.sender_id == user.id else 'received' }}">
+                        <div class="victim-message-content">{{ message.content }}</div>
+                        <div class="victim-message-time">{{ message.timestamp.strftime('%H:%M') }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <form action="{{ url_for('victimProfile.send_message') }}" method="POST" class="victim-message-form" id="victimMessageForm">
+                    <textarea name="message" id="victimMessageInput" placeholder="Type your message..." required></textarea>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
             </div>
-            <form action="{{ url_for('victimProfile.update_location') }}" method="POST" class="victim-location-form">
-                <div class="form-group">
-                    <button type="button" class="btn btn-secondary" id="detectLocationBtn" style="width: 100%; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
-                        <ion-icon name="location"></ion-icon> Use Current Location
-                    </button>
-                    <label for="address">Current Address:</label>
-                    <input type="text" id="address" name="address" value="{{ profile.address }}">
+        </section>
+
+        <!-- Location Section -->
+        <section class="content-section" id="location">
+            <h2 class="section-title">Location Settings</h2>
+            <div class="victim-location-settings">
+                <div class="victim-location-sharing">
+                    <h3>Location Sharing</h3>
+                    <label class="switch">
+                        <input type="checkbox" id="locationToggleSection" {{ 'checked' if profile.location_sharing }}>
+                        <span class="slider round"></span>
+                    </label>
+                    <p>Allow responders to see your location</p>
                 </div>
-                <div class="form-group">
-                    <label for="city">City:</label>
-                    <input type="text" id="city" name="city" value="{{ profile.city }}">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Update Location</button>
-                </div>
-            </form>
-        </div>
-    </div>
+                <form action="{{ url_for('victimProfile.update_location') }}" method="POST" class="victim-location-form">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary" id="detectLocationBtn" style="width: 100%; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                            <ion-icon name="location"></ion-icon> Use Current Location
+                        </button>
+                        <label for="address">Current Address:</label>
+                        <input type="text" id="address" name="address" value="{{ profile.address }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City:</label>
+                        <input type="text" id="city" name="city" value="{{ profile.city }}">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Update Location</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/sos.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/intlTelInput.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/utils.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab switching functionality
-    const tabs = document.querySelectorAll('.tab-btn');
-    const contents = document.querySelectorAll('.tab-content');
+    // Modal functionality
+    const editProfileBtn = document.getElementById('editProfileBtn');
+    const changePasswordBtn = document.getElementById('changePasswordBtn');
+    const editProfileModal = document.getElementById('editProfileModal');
+    const changePasswordModal = document.getElementById('changePasswordModal');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const closePasswordModal = document.getElementById('closePasswordModal');
+    const cancelProfileEdit = document.getElementById('cancelProfileEdit');
+    const cancelPasswordChange = document.getElementById('cancelPasswordChange');
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const target = tab.dataset.tab;
+    // Open Edit Profile Modal
+    if (editProfileBtn) {
+        editProfileBtn.addEventListener('click', function() {
+            editProfileModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Initialize intl-tel-input when modal opens
+            initProfilePhone();
+        });
+    }
+
+    // Open Change Password Modal
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', function() {
+            changePasswordModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    // Close modals
+    function closeModal(modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (closeProfileModal) closeProfileModal.addEventListener('click', () => closeModal(editProfileModal));
+    if (closePasswordModal) closePasswordModal.addEventListener('click', () => closeModal(changePasswordModal));
+    if (cancelProfileEdit) cancelProfileEdit.addEventListener('click', () => closeModal(editProfileModal));
+    if (cancelPasswordChange) cancelPasswordChange.addEventListener('click', () => closeModal(changePasswordModal));
+
+    // Close modal on overlay click
+    [editProfileModal, changePasswordModal].forEach(modal => {
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal(modal);
+            });
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (editProfileModal.classList.contains('active')) closeModal(editProfileModal);
+            if (changePasswordModal.classList.contains('active')) closeModal(changePasswordModal);
+        }
+    });
+
+    // Initialize intl-tel-input for profile phone
+    let profileIti = null;
+    function initProfilePhone() {
+        const profilePhoneInput = document.querySelector('#profile_phone');
+        const profileFullPhoneInput = document.querySelector('#profile_full_phone');
+        
+        if (profilePhoneInput && !profileIti) {
+            profileIti = window.intlTelInput(profilePhoneInput, {
+                initialCountry: 'ke',
+                preferredCountries: ['ke', 'ug', 'tz', 'rw', 'et', 'za', 'ng', 'gh', 'us', 'gb'],
+                separateDialCode: true,
+                utilsScript: 'https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.21/js/utils.js'
+            });
             
-            // Update active tab
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+            // On form submit, set the full phone number with country code
+            const profileForm = document.querySelector('#profileForm');
+            if (profileForm) {
+                profileForm.addEventListener('submit', function(e) {
+                    if (profileFullPhoneInput && profileIti) {
+                        profileFullPhoneInput.value = profileIti.getNumber();
+                    }
+                });
+            }
+        }
+    }
+
+    // Sidebar toggle functionality
+    const sidebar = document.getElementById('victimSidebar');
+    const mainContent = document.getElementById('victimMainContent');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('expanded');
+        
+        if (sidebar.classList.contains('collapsed')) {
+            toggleIcon.setAttribute('name', 'chevron-forward-outline');
+        } else {
+            toggleIcon.setAttribute('name', 'chevron-back-outline');
+        }
+    });
+
+    // Sidebar navigation functionality
+    const navBtns = document.querySelectorAll('.sidebar-nav-btn');
+    const sections = document.querySelectorAll('.content-section');
+
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.section;
             
-            // Show corresponding content
-            contents.forEach(content => {
-                content.classList.remove('active');
-                if (content.id === target) {
-                    content.classList.add('active');
+            // Update active nav button
+            navBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show corresponding section
+            sections.forEach(section => {
+                section.classList.remove('active');
+                if (section.id === target) {
+                    section.classList.add('active');
                 }
             });
         });
@@ -239,28 +451,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const serviceFilter = document.getElementById('serviceFilter');
     const resourceCards = document.querySelectorAll('.victim-resource-card');
 
-    serviceFilter.addEventListener('change', () => {
-        const selectedType = serviceFilter.value;
-        resourceCards.forEach(card => {
-            if (!selectedType || card.dataset.type === selectedType) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+    if (serviceFilter) {
+        serviceFilter.addEventListener('change', () => {
+            const selectedType = serviceFilter.value;
+            resourceCards.forEach(card => {
+                if (!selectedType || card.dataset.type === selectedType) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         });
-    });
+    }
 
     // Location toggle functionality
     const locationToggle = document.getElementById('locationToggle');
     const locationStatus = document.getElementById('locationStatus');
     
-    // Set initial status based on checkbox state
-    locationStatus.textContent = locationToggle.checked ? "Location enabled" : "Location disabled";
-    
-    // Update status when toggle changes
-    locationToggle.addEventListener('change', function() {
-        locationStatus.textContent = this.checked ? "Location enabled" : "Location disabled";
-    });
+    if (locationToggle && locationStatus) {
+        locationStatus.textContent = locationToggle.checked ? "Location enabled" : "Location disabled";
+        
+        locationToggle.addEventListener('change', function() {
+            locationStatus.textContent = this.checked ? "Location enabled" : "Location disabled";
+        });
+    }
 
     // Polling for new messages
     function fetchMessages() {
@@ -300,13 +514,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Auto-detect Location Logic (Moved up to ensure execution)
+    // Auto-detect Location Logic
     const detectLocationBtn = document.getElementById('detectLocationBtn');
     const addressInput = document.getElementById('address');
     const cityInput = document.getElementById('city');
 
     if (detectLocationBtn) {
-        console.log("Location button found and listener attached");
         detectLocationBtn.addEventListener('click', function() {
             if (navigator.geolocation) {
                 const originalText = detectLocationBtn.innerHTML;
@@ -316,43 +529,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 navigator.geolocation.getCurrentPosition(function(position) {
                     const lat = position.coords.latitude;
                     const long = position.coords.longitude;
-                    console.log("Location retrieved:", lat, long);
                     
-                    // Fetch address from OpenStreetMap Nominatim
                     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}`, {
-                        headers: {
-                            'User-Agent': 'GBV-Intervention-App/1.0'
+                        headers: { 'User-Agent': 'GBV-Intervention-App/1.0' }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (addressInput) {
+                            addressInput.value = data.display_name;
+                        }
+                        if (cityInput) {
+                            cityInput.value = data.address.city || data.address.town || data.address.village || data.address.county || '';
                         }
                     })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (addressInput) {
-                                // Try to construct a cleaner address line
-                                let addrStr = data.display_name;
-                                if (data.address) {
-                                    const parts = [];
-                                    if (data.address.house_number) parts.push(data.address.house_number);
-                                    if (data.address.road) parts.push(data.address.road);
-                                    if (parts.length > 0) addrStr = parts.join(' ');
-                                    else if (data.address.suburb) addrStr = data.address.suburb;
-                                }
-                                addressInput.value = data.display_name; // Fallback to full display name for now as it's most accurate
-                            }
-                            if (cityInput) {
-                                cityInput.value = data.address.city || data.address.town || data.address.village || data.address.county || '';
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error fetching address:', error);
-                            alert('Could not fetch address details.');
-                        })
-                        .finally(() => {
-                            detectLocationBtn.innerHTML = originalText;
-                            detectLocationBtn.disabled = false;
-                        });
+                    .catch(error => {
+                        console.error('Error fetching address:', error);
+                        alert('Could not fetch address details.');
+                    })
+                    .finally(() => {
+                        detectLocationBtn.innerHTML = originalText;
+                        detectLocationBtn.disabled = false;
+                    });
 
                 }, function(error) {
-                    console.error('Error getting location:', error);
                     let errorMsg = 'Error getting location.';
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
@@ -364,9 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         case error.TIMEOUT:
                             errorMsg = "The request to get user location timed out.";
                             break;
-                        case error.UNKNOWN_ERROR:
-                            errorMsg = "An unknown error occurred.";
-                            break;
                     }
                     alert(errorMsg);
                     detectLocationBtn.innerHTML = originalText;
@@ -376,17 +572,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert("Geolocation is not supported by this browser.");
             }
         });
-    } else {
-        console.error("Location button not found!");
     }
 
     try {
-        fetchMessages(); // Initial fetch
+        fetchMessages();
     } catch (e) {
         console.error("Error fetching messages:", e);
     }
-
-    // Auto-detect Location removed from here (duplicates)
 });
 </script>
 {% endblock %}

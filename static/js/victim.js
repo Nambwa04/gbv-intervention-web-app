@@ -48,7 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', function() {
             const victimId = this.getAttribute('data-id');
-            const username = this.getAttribute('data-username');
+            const firstName = this.getAttribute('data-first_name');
+            const lastName = this.getAttribute('data-last_name');
             const email = this.getAttribute('data-email');
             const phone = this.getAttribute('data-phone');
             const gender = this.getAttribute('data-gender');
@@ -56,7 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const caseDescription = this.getAttribute('data-case_description');
 
             document.getElementById('edit_victim_id').value = victimId;
-            document.getElementById('edit_name').value = username;
+            document.getElementById('edit_first_name').value = firstName;
+            document.getElementById('edit_last_name').value = lastName;
             document.getElementById('edit_email').value = email;
             document.getElementById('edit_phone').value = phone;
             document.getElementById('edit_gender').value = gender;
