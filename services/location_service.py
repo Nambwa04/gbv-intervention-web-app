@@ -4,7 +4,7 @@ from bson import ObjectId
 from datetime import datetime
 
 class LocationService:
-    def update_victim_location(self, user_id, latitude, longitude):
+    def update_victim_location(self, user_id, latitude, longitude, address=None, city=None):
         """
         Update the location of a victim
         """
@@ -14,10 +14,25 @@ class LocationService:
             'timestamp': datetime.utcnow()
         }
         
+        # Add address info if provided
+        if address:
+            location_data['address'] = address
+        if city:
+            location_data['city'] = city
+        
         # Update the user document with the location information
         mongo.db.users.update_one(
             {'_id': ObjectId(user_id)},
             {'$set': {'location': location_data}}
+        )
+        
+        # Also update the victim profile
+        mongo.db.victims.update_one(
+            {'user_id': ObjectId(user_id)},
+            {'$set': {
+                'current_location': location_data,
+                'last_location_update': datetime.utcnow()
+            }}
         )
         
         # Also store in separate locations collection for historical tracking
@@ -25,7 +40,10 @@ class LocationService:
             'user_id': ObjectId(user_id),
             'latitude': latitude,
             'longitude': longitude,
-            'timestamp': datetime.utcnow()
+            'address': address,
+            'city': city,
+            'timestamp': datetime.utcnow(),
+            'source': 'auto'  # Mark as auto-detected
         }
         
         mongo.db.locations.insert_one(location_entry)
@@ -50,3 +68,13 @@ class LocationService:
         )
         
         return list(users)
+    
+    def get_victim_location_history(self, user_id, limit=10):
+        """
+        Get location history for a victim
+        """
+        locations = mongo.db.locations.find(
+            {'user_id': ObjectId(user_id)}
+        ).sort('timestamp', -1).limit(limit)
+        
+        return list(locations)

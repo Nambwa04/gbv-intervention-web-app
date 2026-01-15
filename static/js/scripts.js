@@ -298,6 +298,27 @@ setInterval(updateDateTime, 1000);
 updateDateTime();
 // END OF admin.html
 
+// Back Button Functionality
+function goBack() {
+    if (window.history.length > 1) {
+        window.history.back();
+    } else {
+        // Fallback to home page if no history
+        window.location.href = '/';
+    }
+}
+
+// Initialize back buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const backButtons = document.querySelectorAll('.back-btn, [data-action="back"]');
+    backButtons.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            goBack();
+        });
+    });
+});
+
 console.log('Script loaded');
 const button = document.getElementById('someButton');
 if (button) {

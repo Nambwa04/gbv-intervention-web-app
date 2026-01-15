@@ -78,13 +78,16 @@ p {
 .navbar .nav-links {
     list-style: none;
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
+    align-items: center;
 }
 .navbar .nav-links li {
     margin: 0;
+    display: flex;
+    align-items: center;
 }
 .navbar .nav-links li:nth-child(-n+3) {
-    margin-top: 15px;/*spacing for home, about Us and Contact us*/
+    margin-top: 0;
 }
 .navbar .nav-links a {
     color: #000000;
@@ -94,6 +97,11 @@ p {
 }
 .navbar .nav-links a:hover {
     color: #d32f2f;
+}
+
+/* Navbar buttons need vertical alignment adjustment */
+.navbar .nav-links .btn {
+    padding: 0.6rem 1.2rem;
 }
 
 /* Sidebar */
@@ -408,40 +416,69 @@ text-decoration: underline;
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .organizationsTable th,
 .organizationsTable td {
-    padding: 0.75rem;
-    border: 1px solid #e9ecef;
+    padding: 1rem 0.75rem;
     text-align: left;
+    border-bottom: 1px solid #e9ecef;
 }
 .organizationsTable th {
-    background-color: #D32F2F;
+    background-color: #d32f2f;
+    color: #ffffff;
     font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.organizationsTable tbody tr {
+    background-color: #ffffff; 
+    transition: background-color 0.2s ease;
+}
+.organizationsTable tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+.organizationsTable tbody tr:hover {
+    background-color: #fce4e4; 
+}
+.organizationsTable td {
+    color: #333333;
+    font-size: 0.95rem;
 }
 .organizationsTable td.actions {
     display: flex;
     gap: 0.5rem;
 }
 .organizationsTable .edit-btn {
-    background-color: rgb(130, 9, 9);
+    background-color: #ffffff; 
+    color: #d32f2f; 
+    border: 1px solid #d32f2f; 
 }
 .organizationsTable .delete-btn {
-    background-color: rgb(9, 130, 9);    
+    background-color: #d32f2f; 
+    color: #ffffff;
+    border: 1px solid #d32f2f;
 }
 .organizationsTable .edit-btn,
 .organizationsTable .delete-btn {
     padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    font-size: 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
-.organizationsTable .edit-btn:hover,
+.organizationsTable .edit-btn:hover {
+    background-color: #d32f2f; 
+    color: #ffffff;
+}
 .organizationsTable .delete-btn:hover {
-    background-color: #b71c1c;
+    background-color: #b71c1c; 
+    border-color: #b71c1c;
 }
 
 /* Form Container */
@@ -1776,6 +1813,12 @@ button:hover {
     border-bottom: 1px solid #e0e0e0;
 }
 
+.admin-header .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .admin-header .header-left h1 {
     margin: 0;
     font-size: 1.5rem;
@@ -1880,6 +1923,7 @@ button:hover {
 .victim-profile-header, 
 .organization-profile-header,
 .responder-profile-header {
+    position: relative;
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
@@ -2029,6 +2073,28 @@ button:hover {
 .victim-location-settings {
     margin-bottom: 1rem;
 }
+
+/* Location History Styles */
+.location-history {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.location-history h3 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #d32f2f;
+    padding-bottom: 0.5rem;
+}
+.location-history ul li:last-child {
+    border-bottom: none;
+}
+.auto-location-status {
+    border-left: 4px solid #d32f2f;
+}
+
 .victim-case-card,
 .victim-resource-card,
 .victim-message,
@@ -2767,6 +2833,85 @@ input:checked + .location-toggle-slider:before {
     background-color: #6c757d;
     color: white;
 }
+
+/* Back Button Styles */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background-color: transparent;
+    color: #000000;
+    border: none;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    background-color: transparent;
+    color: #d32f2f;
+}
+
+.back-btn ion-icon {
+    font-size: 1.1rem;
+    vertical-align: middle;
+}
+
+/* Back button in header */
+.header-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.header-back-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Back button for auth pages */
+.auth-back-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 1rem;
+    background-color: transparent;
+    color: #d32f2f;
+    border: 1px solid #d32f2f;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    z-index: 100;
+}
+
+.auth-back-btn:hover {
+    background-color: #d32f2f;
+    color: white;
+}
+
+/* Container for pages with back button */
+.page-with-back {
+    position: relative;
+}
+
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .spin { animation: spin 1s linear infinite; }
 

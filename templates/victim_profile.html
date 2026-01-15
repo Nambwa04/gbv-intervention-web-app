@@ -11,6 +11,9 @@
         </button>
         
         <div class="sidebar-header">
+            <a href="#" class="back-btn" data-action="back" style="margin-bottom: 0.5rem; width: 100%; justify-content: center;">
+                <ion-icon name="arrow-back-outline"></ion-icon> Back
+            </a>
             <div class="sidebar-profile-image">
                 <div class="profile-placeholder" id="profilePic">
                     <ion-icon name="person-circle" style="font-size: 60px; color: #e0e0e0;"></ion-icon>
@@ -55,22 +58,11 @@
 
     <!-- Main Content Area -->
     <main class="victim-main-content" id="victimMainContent">
-        <!-- Top Bar with SOS and Location Toggle -->
+        <!-- Top Bar with SOS -->
         <div class="victim-topbar">
             <div class="sos-button-container">
                 <button id="sosButton" class="sos-button">SOS EMERGENCY</button>
                 <div class="sos-button-help">Click in case of emergency</div>
-            </div>
-            <div class="location-toggle-container">
-                <label class="location-toggle">
-                    <input type="checkbox" id="locationToggle">
-                    <span class="location-toggle-slider"></span>
-                </label>
-                <div class="location-status-container">
-                    <span class="location-status" id="locationStatus">Disabled</span>
-                    <span class="last-updated" id="lastUpdatedTime"></span>
-                </div>
-                <div class="location-indicator" id="locationIndicator"></div>
             </div>
         </div>
 
@@ -290,30 +282,36 @@
         <section class="content-section" id="location">
             <h2 class="section-title">Location Settings</h2>
             <div class="victim-location-settings">
-                <div class="victim-location-sharing">
-                    <h3>Location Sharing</h3>
-                    <label class="switch">
-                        <input type="checkbox" id="locationToggleSection" {{ 'checked' if profile.location_sharing }}>
-                        <span class="slider round"></span>
-                    </label>
-                    <p>Allow responders to see your location</p>
+                <!-- Auto Location Status -->
+                <div class="auto-location-status" id="autoLocationStatus" style="margin-bottom: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: none;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <ion-icon name="location" style="color: #d32f2f; font-size: 1.5rem;"></ion-icon>
+                        <div>
+                            <strong>Current Location Detected</strong>
+                            <p id="currentLocationText" style="margin: 0; font-size: 0.9rem; color: #666;"></p>
+                        </div>
+                    </div>
                 </div>
-                <form action="{{ url_for('victimProfile.update_location') }}" method="POST" class="victim-location-form">
-                    <div class="form-group">
-                        <button type="button" class="btn btn-secondary" id="detectLocationBtn" style="width: 100%; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
-                            <ion-icon name="location"></ion-icon> Use Current Location
-                        </button>
-                        <label for="address">Current Address:</label>
-                        <input type="text" id="address" name="address" value="{{ profile.address }}">
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary" id="detectLocationBtn" style="width: 100%; margin-bottom: 1rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+                        <ion-icon name="location"></ion-icon> Refresh Current Location
+                    </button>
+                    <label for="address">Current Address:</label>
+                    <input type="text" id="address" name="address" value="{{ profile.address or profile.current_location.address if profile.current_location else '' }}" readonly style="background: #f5f5f5;">
+                </div>
+                <div class="form-group">
+                    <label for="city">City:</label>
+                    <input type="text" id="city" name="city" value="{{ profile.city or profile.current_location.city if profile.current_location else '' }}" readonly style="background: #f5f5f5;">
+                </div>
+
+                <!-- Location History -->
+                <div class="location-history" style="margin-top: 2rem;">
+                    <h3>Location History</h3>
+                    <div id="locationHistoryList" style="max-height: 300px; overflow-y: auto;">
+                        <p style="color: #666;">Loading location history...</p>
                     </div>
-                    <div class="form-group">
-                        <label for="city">City:</label>
-                        <input type="text" id="city" name="city" value="{{ profile.city }}">
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">Update Location</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </section>
     </main>
@@ -464,18 +462,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Location toggle functionality
-    const locationToggle = document.getElementById('locationToggle');
-    const locationStatus = document.getElementById('locationStatus');
-    
-    if (locationToggle && locationStatus) {
-        locationStatus.textContent = locationToggle.checked ? "Location enabled" : "Location disabled";
-        
-        locationToggle.addEventListener('change', function() {
-            locationStatus.textContent = this.checked ? "Location enabled" : "Location disabled";
-        });
-    }
-
     // Polling for new messages
     function fetchMessages() {
         $.ajax({
@@ -514,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Auto-detect Location Logic
+    // Auto-detect Location Logic (manual button)
     const detectLocationBtn = document.getElementById('detectLocationBtn');
     const addressInput = document.getElementById('address');
     const cityInput = document.getElementById('city');
@@ -535,12 +521,43 @@ document.addEventListener('DOMContentLoaded', function() {
                     })
                     .then(response => response.json())
                     .then(data => {
+                        const address = data.display_name || '';
+                        const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                        
                         if (addressInput) {
-                            addressInput.value = data.display_name;
+                            addressInput.value = address;
                         }
                         if (cityInput) {
-                            cityInput.value = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                            cityInput.value = city;
                         }
+                        
+                        // Also save to database immediately
+                        fetch("{{ url_for('victimProfile.auto_location') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                latitude: lat,
+                                longitude: long,
+                                address: address,
+                                city: city
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.success) {
+                                // Update status display
+                                const statusDiv = document.getElementById('autoLocationStatus');
+                                const locationText = document.getElementById('currentLocationText');
+                                if (statusDiv && locationText) {
+                                    statusDiv.style.display = 'block';
+                                    locationText.textContent = city ? `${city} - ${address.substring(0, 50)}...` : address.substring(0, 80) + '...';
+                                }
+                                // Reload location history
+                                loadLocationHistory();
+                            }
+                        });
                     })
                     .catch(error => {
                         console.error('Error fetching address:', error);
@@ -579,6 +596,145 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) {
         console.error("Error fetching messages:", e);
     }
+
+    // Load location history first (doesn't require geolocation permission)
+    loadLocationHistory();
+    
+    // Then auto-detect location on page load
+    autoDetectLocation();
 });
+
+// Function to load location history
+function loadLocationHistory() {
+    fetch("{{ url_for('victimProfile.get_location_history') }}")
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const historyList = document.getElementById('locationHistoryList');
+            if (!historyList) return;
+            
+            if (data.success && data.locations && data.locations.length > 0) {
+                let html = '<ul style="list-style: none; padding: 0; margin: 0;">';
+                data.locations.forEach(loc => {
+                    const date = new Date(loc.timestamp);
+                    const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    const locationText = loc.city || loc.address || `${loc.latitude.toFixed(4)}, ${loc.longitude.toFixed(4)}`;
+                    
+                    html += `
+                        <li style="padding: 0.75rem; border-bottom: 1px solid #e9ecef; display: flex; align-items: flex-start; gap: 0.75rem;">
+                            <ion-icon name="location-outline" style="color: #d32f2f; font-size: 1.2rem; margin-top: 2px;"></ion-icon>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.9rem; color: #333;">${locationText}</div>
+                                <div style="font-size: 0.75rem; color: #888;">${formattedDate}</div>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                historyList.innerHTML = html;
+            } else {
+                historyList.innerHTML = '<p style="color: #666; text-align: center; padding: 1rem;">No location history available</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading location history:', error);
+            const historyList = document.getElementById('locationHistoryList');
+            if (historyList) {
+                historyList.innerHTML = '<p style="color: #666;">Could not load location history</p>';
+            }
+        });
+}
+
+// Function to auto-detect location on login/page load
+function autoDetectLocation() {
+    if (!navigator.geolocation) {
+        console.log('Geolocation not supported');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const long = position.coords.longitude;
+            
+            // Fetch address from coordinates using reverse geocoding
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${long}`, {
+                headers: { 'User-Agent': 'GBV-Intervention-App/1.0' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const address = data.display_name || '';
+                const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                
+                // Send auto-detected location to server
+                fetch("{{ url_for('victimProfile.auto_location') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: long,
+                        address: address,
+                        city: city
+                    })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        console.log('Location auto-captured successfully');
+                        // Show the auto-location status
+                        const statusDiv = document.getElementById('autoLocationStatus');
+                        const locationText = document.getElementById('currentLocationText');
+                        if (statusDiv && locationText) {
+                            statusDiv.style.display = 'block';
+                            locationText.textContent = city ? `${city} - ${address.substring(0, 50)}...` : address.substring(0, 80) + '...';
+                        }
+                        // Update the form fields
+                        const addressInput = document.getElementById('address');
+                        const cityInput = document.getElementById('city');
+                        if (addressInput && !addressInput.value) addressInput.value = address;
+                        if (cityInput && !cityInput.value) cityInput.value = city;
+                        
+                        // Reload location history
+                        loadLocationHistory();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending auto-location:', error);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching address:', error);
+                // Still send coordinates even if address lookup fails
+                fetch("{{ url_for('victimProfile.auto_location') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: long,
+                        address: '',
+                        city: ''
+                    })
+                })
+                .then(() => loadLocationHistory());
+            });
+        },
+        function(error) {
+            console.log('Location access denied or unavailable:', error.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000 // Cache for 5 minutes
+        }
+    );
+}
 </script>
 {% endblock %}

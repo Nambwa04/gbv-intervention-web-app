@@ -123,14 +123,79 @@ def update_location():
         
         latitude = data['latitude']
         longitude = data['longitude']
+        address = data.get('address')
+        city = data.get('city')
         
-        # Update location in database
-        location_service.update_victim_location(user_id, latitude, longitude)
+        # Update location in database with address info
+        location_service.update_victim_location(user_id, latitude, longitude, address, city)
         
         return jsonify({'success': True}), 200
         
     except Exception as e:
         current_app.logger.error(f"Error updating location: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@victimProfile_bp.route('/auto_location', methods=['POST'])
+@role_required('victim')
+def auto_location():
+    """Automatically capture and store victim location on login"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        data = request.get_json()
+        user_id = session['user_id']
+        
+        if not data or 'latitude' not in data or 'longitude' not in data:
+            return jsonify({'success': False, 'error': 'Invalid location data'}), 400
+        
+        latitude = data['latitude']
+        longitude = data['longitude']
+        address = data.get('address', '')
+        city = data.get('city', '')
+        
+        # Update location in database
+        location_service.update_victim_location(user_id, latitude, longitude, address, city)
+        
+        logger.info(f"Auto-captured location for user {user_id}: {latitude}, {longitude}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Location captured successfully',
+            'location': {
+                'latitude': latitude,
+                'longitude': longitude,
+                'address': address,
+                'city': city
+            }
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error auto-capturing location: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@victimProfile_bp.route('/get_location_history', methods=['GET'])
+@role_required('victim')
+def get_location_history():
+    """Get victim's location history"""
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+    
+    try:
+        user_id = session['user_id']
+        locations = location_service.get_victim_location_history(user_id)
+        
+        # Convert ObjectId to string for JSON serialization
+        for loc in locations:
+            loc['_id'] = str(loc['_id'])
+            loc['user_id'] = str(loc['user_id'])
+            if 'timestamp' in loc:
+                loc['timestamp'] = loc['timestamp'].isoformat()
+        
+        return jsonify({'success': True, 'locations': locations}), 200
+        
+    except Exception as e:
+        logger.error(f"Error getting location history: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # Get messages
